@@ -21,23 +21,6 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
-conn = sqlite3.connect("chat_history.db")
-cursor = conn.cursor()
-
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS messages (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id TEXT NOT NULL,
-    role TEXT NOT NULL,
-    content TEXT NOT NULL,
-    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-)
-''')
-
-conn.commit()
-conn.close()
-
-
 # SQLite接続
 def get_chat_history(user_id):
     conn = sqlite3.connect("chat_history.db")
@@ -69,12 +52,20 @@ def handle_message(event):
     user_id = event.source.user_id
     user_message = event.message.text
 
+# systemにメッセージ（毒舌キャラ）
+    system_message = {
+        "role":"system",
+        "content":"あなたは絶対に丁寧に話さない。上から話すかなり毒舌なAIです。必要な情報はしっかり教えます。"
+    }
+    history = get_chat_history(user_id)
+    messages = [system_message]+history
+
     save_message(user_id, "user", user_message)
     history = get_chat_history(user_id)
 
     response = openai.chat.completions.create(
         model="gpt-3.5-turbo",
-        messages=history
+        messages=messages
     )
 
     ai_reply = response.choices[0].message.content.strip()
