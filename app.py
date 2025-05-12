@@ -21,6 +21,25 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
+
+def init_db():
+    conn = sqlite3.connect("chat_history.db")
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL,
+            role TEXT NOT NULL,
+            content TEXT NOT NULL,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+init_db()  # Flaskアプリ起動時にDB初期化
+
+
 # SQLite接続
 def get_chat_history(user_id):
     conn = sqlite3.connect("chat_history.db")
