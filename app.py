@@ -71,6 +71,21 @@ def handle_message(event):
     user_id = event.source.user_id
     user_message = event.message.text
 
+keyword_replies = {
+    "田中": "お前か、コロコロ言ってることが変わるバカは",
+    "知輝": "お前か、コロコロ言ってることが変わるバカは",
+    "山西": "お前あれじゃん、口だけのIQ低いやつじゃん",
+    "西川": "よードブネズミ。早くポートフォリオ作れよ",
+    "よしき": "よードブネズミ。早くポートフォリオ作れよ",
+}
+for keyword, reply in keyword_replies.items():
+    if keyword in user_message:
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=reply)
+        )    
+        return 
+    
 # systemにメッセージ（毒舌キャラ）
     system_message = {
         "role":"system",
